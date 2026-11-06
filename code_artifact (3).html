@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>일본 전통 방 '와시쓰(わしつ)' 탐험 게임</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;600;700;900&display=swap');
+        
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #1f1917;
+            color: #2d2522;
+            user-select: none;
+        }
+
+        .paper-bg {
+            background-color: #faf7f2;
+            background-image: radial-gradient(#e2d9cc 1px, transparent 1px);
+            background-size: 18px 18px;
+        }
+
+        /* Hotspot pulse animation */
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { transform: scale(1.1); box-shadow: 0 0 0 14px rgba(16, 185, 129, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+
+        .hotspot-btn {
+            animation: pulse-ring 2s infinite;
+            transition: all 0.2s ease;
+        }
+
+        .hotspot-btn:hover {
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-2 sm:p-4">
+
+    <!-- 메인 프레임 -->
+    <div class="w-full max-w-5xl bg-[#fdfbf7] rounded-3xl shadow-2xl overflow-hidden border-4 border-[#734f31] flex flex-col min-h-[680px] relative">
+        
+        <!-- 상단 헤더 (게임 실행 중 노출) -->
+        <header id="main-header" class="hidden bg-[#523621] text-[#faf7f2] p-3 sm:p-4 flex flex-wrap justify-between items-center border-b-4 border-[#331f11]">
+            <div class="flex items-center space-x-3">
+                <i class="fa-solid fa-torii-gate text-amber-400 text-xl sm:text-2xl"></i>
+                <h1 class="text-base sm:text-xl font-bold tracking-wide">와시쓰(わしつ) 전통 방 탐험</h1>
+            </div>
+            
+            <div class="flex items-center space-x-3 text-xs sm:text-sm mt-1 sm:mt-0">
+                <div class="bg-[#382212] px-3 py-1 rounded-full flex items-center space-x-1.5 border border-amber-600/40">
+                    <i class="fa-solid fa-stamp text-emerald-400"></i>
+                    <span>탐험 완료: <strong id="stamp-count" class="text-emerald-300">0</strong>/6</span>
+                </div>
+                <div class="bg-[#382212] px-3 py-1 rounded-full flex items-center space-x-1.5 border border-amber-600/40">
+                    <i class="fa-solid fa-star text-amber-400"></i>
+                    <span>점수: <strong id="score-display" class="text-amber-300">0</strong> P</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- [1] 시작 화면 (START SCREEN) -->
+        <section id="screen-start" class="flex-1 paper-bg p-6 sm:p-10 flex flex-col items-center justify-center text-center relative overflow-hidden">
+            <div class="absolute -top-12 -left-12 text-amber-900/5 text-9xl font-black">和室</div>
+            <div class="absolute -bottom-12 -right-12 text-amber-900/5 text-9xl font-black">畳</div>
+
+            <div class="z-10 max-w-2xl">
+                <div class="inline-block bg-amber-100 text-amber-900 border border-amber-700/40 px-4 py-1.5 rounded-full text-xs sm:text-sm font-bold mb-4 shadow-sm">
+                    🍵 일본 전통 문화 체험 학습
+                </div>
+                
+                <h1 class="text-3xl sm:text-5xl font-black text-[#3b2314] mb-4 leading-tight">
+                    일본 전통 방<br><span class="text-emerald-700">'와시쓰(わしつ)' 탐험 게임</span>
+                </h1>
+                
+                <p class="text-gray-700 text-sm sm:text-base mb-8 leading-relaxed">
+                    다다미, 도코노마, 고타쓰 등 일본의 전통 방 구석구석을 둘러보고<br class="hidden sm:block">
+                    각 요소에 담긴 문화와 방문 예절 퀴즈를 풀어보세요!
+                </p>
+
+                <!-- 요소 미리보기 키워드 6개 -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 mb-8 text-xs font-bold text-[#543622]">
+                    <div class="bg-white/80 p-2.5 rounded-lg border border-amber-800/20 shadow-sm flex items-center justify-center space-x-1">
+                        <i class="fa-solid fa-rug text-emerald-600"></i> <span>다다미(たたみ)</span>
+                    </div>
+                    <div class="bg-white/80 p-2.5 rounded-lg border border-amber-800/20 shadow-sm flex items-center justify-center space-x-1">
+                        <i class="fa-solid fa-[#000000] text-amber-600"><i class="fa-solid fa-scroll"></i></i> <span>도코노마(とこのま)</span>
+                    </div>
+                    <div class="bg-white/80 p-2.5 rounded-lg border border-amber-800/20 shadow-sm flex items-center justify-center space-x-1">
+                        <i class="fa-solid fa-table text-amber-700"></i> <span>고타쓰(こたつ)</span>
+                    </div>
+                    <div class="bg-white/80 p-2.5 rounded-lg border border-amber-800/20 shadow-sm flex items-center justify-center space-x-1">
+                        <i class="fa-solid fa-[#000000] text-amber-600"><i class="fa-solid fa-sun"></i></i> <span>쇼지(しょうじ)</span>
+                    </div>
+                    <div class="bg-white/80 p-2.5 rounded-lg border border-amber-800/20 shadow-sm flex items-center justify-center space-x-1">
+                        <i class="fa-solid fa-door-closed text-amber-800"></i> <span>후스마(ふすま)</span>
+                    </div>
+                    <div class="bg-white/80 p-2.5 rounded-lg border border-amber-800/20 shadow-sm flex items-center justify-center space-x-1">
+                        <i class="fa-solid fa-box-archive text-amber-800"></i> <span>오시이레(おしいれ)</span>
+                    </div>
+                </div>
+
+                <button onclick="startGame()" class="bg-[#523621] hover:bg-[#382212] text-amber-100 font-bold text-lg sm:text-xl px-10 py-4 rounded-2xl shadow-xl border-b-4 border-[#24150b] transform active:translate-y-1 transition-all flex items-center justify-center space-x-3 mx-auto">
+                    <span>게임 시작하기</span>
+                    <i class="fa-solid fa-circle-play text-emerald-400"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- [2] 와시쓰 방 탐험 메인 화면 (MAIN WASHITSU ROOM VIEW) -->
+        <section id="screen-room" class="hidden flex-1 p-3 sm:p-6 flex flex-col justify-between">
+            <div class="bg-amber-50 border-l-4 border-emerald-600 p-2.5 rounded-lg text-xs sm:text-sm text-amber-900 mb-3 flex items-center justify-between shadow-sm">
+                <span><i class="fa-solid fa-hand-pointer text-emerald-600 mr-1.5"></i> 방 안의 반짝이는 핫스팟 버튼을 클릭해 기물 설명과 퀴즈를 확인하세요!</span>
+                <span class="font-bold text-emerald-800">와시쓰 탐험 중</span>
+            </div>
+
+            <!-- 와시쓰 그래픽 방 (SVG View Box) -->
+            <div class="relative w-full aspect-[16/9] max-h-[500px] bg-[#d3c2a3] rounded-2xl overflow-hidden border-4 border-[#523621] shadow-inner flex items-center justify-center">
+                <svg class="w-full h-full" viewBox="0 0 1000 562" xmlns="http://www.w3.org/2000/svg">
+                    <!-- 천장 & 벽면 원근감 구조 -->
+                    <polygon points="0,0 1000,0 820,120 180,120" fill="#eaddca" stroke="#8a6c53" stroke-width="2" />
+                    <polygon points="0,0 180,120 180,440 0,562" fill="#d0be9f" stroke="#8a6c53" stroke-width="2" />
+                    <polygon points="820,120 1000,0 1000,562 820,440" fill="#c3b090" stroke="#8a6c53" stroke-width="2" />
+                    
+                    <!-- 정면 벽 -->
+                    <rect x="180" y="120" width="640" height="320" fill="#e0d0b4" stroke="#8a6c53" stroke-width="3" />
+                    
+                    <!-- 다다미 바닥 (바닥 원근감) -->
+                    <polygon points="0,562 180,440 820,440 1000,562" fill="#a3b88c" stroke="#3d5725" stroke-width="3" />
+                    <!-- 다다미 선 및 테두리 (녹색 헬리) -->
+                    <polygon points="180,440 500,440 500,562 0,562" fill="#a0b588" stroke="#2b421a" stroke-width="4" />
+                    <polygon points="500,440 820,440 1000,562 500,562" fill="#a6bc8e" stroke="#2b421a" stroke-width="4" />
+                    <line x1="340" y1="440" x2="250" y2="562" stroke="#2b421a" stroke-width="6" />
+                    <line x1="660" y1="440" x2="750" y2="562" stroke="#2b421a" stroke-width="6" />
+
+                    <!-- 도코노마 (좌측 벽 장식 공간) -->
+                    <rect x="200" y="150" width="160" height="260" fill="#cbb391" stroke="#523621" stroke-width="4" />
+                    <rect x="210" y="400" width="140" height="15" fill="#523621" />
+                    <!-- 족자 (족자 이미지 표현) -->
+                    <rect x="250" y="170" width="60" height="170" fill="#fcf8f2" stroke="#8a6c53" stroke-width="2" />
+                    <line x1="250" y1="170" x2="310" y2="170" stroke="#523621" stroke-width="4" />
+                    <line x1="245" y1="340" x2="315" y2="340" stroke="#523621" stroke-width="6" />
+                    <path d="M 280,210 Q 290,230 275,260 T 285,300" stroke="#b91c1c" stroke-width="2" fill="none" />
+                    <!-- 꽃병 -->
+                    <path d="M 270,390 Q 260,370 280,360 Q 300,370 290,390 Z" fill="#374151" />
+                    <line x1="280" y1="360" x2="280" y2="345" stroke="#15803d" stroke-width="2" />
+
+                    <!-- 쇼지 (왼쪽 창호지 미닫이문) -->
+                    <rect x="20" y="150" width="130" height="270" fill="#faf7f2" stroke="#523621" stroke-width="4" />
+                    <!-- 창살 격자 -->
+                    <line x1="20" y1="217" x2="150" y2="217" stroke="#8a6c53" stroke-width="2" />
+                    <line x1="20" y1="284" x2="150" y2="284" stroke="#8a6c53" stroke-width="2" />
+                    <line x1="20" y1="351" x2="150" y2="351" stroke="#8a6c53" stroke-width="2" />
+                    <line x1="63" y1="150" x2="63" y2="420" stroke="#8a6c53" stroke-width="2" />
+                    <line x1="106" y1="150" x2="106" y2="420" stroke="#8a6c53" stroke-width="2" />
+
+                    <!-- 오시이레 & 후스마 (우측 벽 붙박이장과 미닫이문) -->
+                    <rect x="640" y="150" width="160" height="260" fill="#edd8bc" stroke="#523621" stroke-width="4" />
+                    <line x1="720" y1="150" x2="720" y2="410" stroke="#523621" stroke-width="3" />
+                    <!-- 문손잡이 (hikite) -->
+                    <circle cx="705" cy="280" r="6" fill="#382212" />
+                    <circle cx="735" cy="280" r="6" fill="#382212" />
+                    <!-- 산 모양 그림 장식 (후스마) -->
+                    <path d="M 650,380 Q 680,330 715,380" stroke="#a3b88c" stroke-width="3" fill="none" />
+                    <path d="M 725,380 Q 755,340 795,380" stroke="#a3b88c" stroke-width="3" fill="none" />
+
+                    <!-- 고타쓰 (방 중앙 따뜻한 테이블) -->
+                    <polygon points="360,430 640,430 680,520 320,520" fill="#991b1b" opacity="0.9" /> <!-- 이불 -->
+                    <polygon points="380,410 620,410 600,430 400,430" fill="#523621" /> <!-- 상판 -->
+                    <rect x="400" y="400" width="200" height="20" fill="#784928" stroke="#382212" stroke-width="2" rx="3" />
+                    <!-- 귤 (고타쓰 위의 귤) -->
+                    <circle cx="500" cy="394" r="8" fill="#f97316" />
+                    <circle cx="498" cy="388" r="2" fill="#15803d" />
+                    <!-- 방석 2개 -->
+                    <polygon points="260,480 330,480 310,510 240,510" fill="#1e3a8a" />
+                    <polygon points="670,480 740,480 760,510 690,510" fill="#1e3a8a" />
+                </svg>
+
+                <!-- 핫스팟 버튼들 (Hotspots Overlay) -->
+                <!-- 1. 다다미 -->
+                <button onclick="openHotspot('tatami')" class="hotspot-btn absolute bottom-[12%] left-[18%] bg-emerald-700 hover:bg-emerald-600 text-white font-bold px-3 py-1.5 rounded-full text-xs sm:text-sm shadow-xl flex items-center space-x-1.5 border-2 border-emerald-200">
+                    <i class="fa-solid fa-rug"></i><span>다다미</span>
+                </button>
+
+                <!-- 2. 도코노마 -->
+                <button onclick="openHotspot('tokonoma')" class="hotspot-btn absolute top-[38%] left-[24%] bg-amber-700 hover:bg-amber-600 text-white font-bold px-3 py-1.5 rounded-full text-xs sm:text-sm shadow-xl flex items-center space-x-1.5 border-2 border-amber-200">
+                    <i class="fa-solid fa-scroll"></i><span>도코노마</span>
+                </button>
+
+                <!-- 3. 고타쓰 -->
+                <button onclick="openHotspot('kotatsu')" class="hotspot-btn absolute top-[68%] left-[46%] bg-red-700 hover:bg-red-600 text-white font-bold px-3 py-1.5 rounded-full text-xs sm:text-sm shadow-xl flex items-center space-x-1.5 border-2 border-red-200">
+                    <i class="fa-solid fa-fire text-amber-300"></i><span>고타쓰</span>
+                </button>
+
+                <!-- 4. 쇼지 -->
+                <button onclick="openHotspot('shoji')" class="hotspot-btn absolute top-[40%] left-[5%] bg-stone-700 hover:bg-stone-600 text-white font-bold px-3 py-1.5 rounded-full text-xs sm:text-sm shadow-xl flex items-center space-x-1.5 border-2 border-stone-200">
+                    <i class="fa-solid fa-sun"></i><span>쇼지</span>
+                </button>
+
+                <!-- 5. 후스마 -->
+                <button onclick="openHotspot('fusuma')" class="hotspot-btn absolute top-[30%] right-[16%] bg-amber-800 hover:bg-amber-700 text-white font-bold px-3 py-1.5 rounded-full text-xs sm:text-sm shadow-xl flex items-center space-x-1.5 border-2 border-amber-200">
+                    <i class="fa-solid fa-door-closed"></i><span>후스마</span>
+                </button>
+
+                <!-- 6. 오시이레 -->
+                <button onclick="openHotspot('oshiire')" class="hotspot-btn absolute top-[55%] right-[12%] bg-yellow-800 hover:bg-yellow-700 text-white font-bold px-3 py-1.5 rounded-full text-xs sm:text-sm shadow-xl flex items-center space-x-1.5 border-2 border-yellow-200">
+                    <i class="fa-solid fa-box-archive"></i><span>오시이레</span>
+                </button>
+            </div>
+
+            <!-- 하단 진행 상태 및 완료 버튼 -->
+            <div class="mt-4 pt-3 border-t border-amber-900/10 flex justify-between items-center">
+                <div class="text-xs sm:text-sm text-gray-700 font-semibold">
+                    💡 6개의 요소를 모두 클릭하여 탐험을 마치면 결과 화면으로 이동합니다.
+                </div>
+                <button id="btn-finish-check" onclick="checkCompletionDirect()" class="bg-[#523621] hover:bg-[#382212] text-amber-100 font-bold px-5 py-2 rounded-xl text-xs sm:text-sm shadow transition-all">
+                    결과 확인하기
+                </button>
+            </div>
+        </section>
+
+        <!-- [3] 완료 화면 (COMPLETION SCREEN) -->
+        <section id="screen-clear" class="hidden flex-1 paper-bg p-6 sm:p-10 flex flex-col items-center justify-center text-center">
+            <div class="w-full max-w-md bg-white p-8 rounded-3xl border-4 border-[#523621] shadow-2xl">
+                <div class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-4xl mx-auto mb-4 border-2 border-emerald-500 shadow-md">
+                    <i class="fa-solid fa-award"></i>
+                </div>
+                
+                <span class="bg-amber-100 text-amber-800 font-bold text-xs px-3 py-1 rounded-full border border-amber-300">와시쓰 마스터 칭호 획득!</span>
+                <h2 class="text-2xl sm:text-3xl font-black text-[#3b2314] mt-2 mb-2">탐험 완료!</h2>
+                <p class="text-gray-600 text-sm mb-6">일본 전통 방 '와시쓰'의 문화를 완벽하게 이해하셨습니다.</p>
+
+                <div class="bg-amber-50 p-4 rounded-2xl border border-amber-200 mb-6 space-y-1">
+                    <div class="text-xs text-gray-500 font-bold uppercase">최종 점수</div>
+                    <div id="final-score" class="text-4xl font-black text-emerald-600">60 P</div>
+                    <p class="text-xs text-amber-800 pt-1">탐험 스탬프: 6 / 6 완료</p>
+                </div>
+
+                <button onclick="startGame()" class="w-full bg-[#523621] hover:bg-[#382212] text-amber-100 font-bold py-3.5 rounded-xl shadow-md transition-all">
+                    다시 하기 (Restart)
+                </button>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- [4] 인터랙티브 팝업 모달 & 퀴즈 (INTERACTIVE MODAL & QUIZ) -->
+    <div id="quiz-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-[#faf7f2] border-4 border-[#523621] rounded-3xl w-full max-w-lg p-6 relative shadow-2xl max-h-[90vh] overflow-y-auto">
+            
+            <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl font-bold">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <!-- 타이틀 영역 -->
+            <div class="flex items-center space-x-3 mb-4">
+                <div id="modal-icon" class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-800 border-2 border-emerald-600 flex items-center justify-center text-2xl shadow-sm">
+                    <i class="fa-solid fa-rug"></i>
+                </div>
+                <div>
+                    <h3 id="modal-title" class="text-xl sm:text-2xl font-bold text-[#3b2314]">기물 이름</h3>
+                    <p id="modal-sub" class="text-xs font-bold text-emerald-700">일본어 발음 및 명칭</p>
+                </div>
+            </div>
+
+            <!-- 세부 설명 -->
+            <div id="modal-desc" class="bg-white p-4 rounded-2xl border border-amber-900/10 text-gray-800 text-sm leading-relaxed mb-4 shadow-sm">
+                설명 내용이 들어갑니다.
+            </div>
+
+            <!-- 예절/문화 팁 -->
+            <div class="bg-amber-100/80 border-l-4 border-amber-600 p-3 rounded-xl text-xs text-amber-900 mb-5">
+                <span class="font-bold block mb-0.5"><i class="fa-solid fa-lightbulb text-amber-600 mr-1"></i> 방문 예절 및 문화</span>
+                <span id="modal-tip">문화 예절 정보입니다.</span>
+            </div>
+
+            <!-- 퀴즈 영역 -->
+            <div class="border-t-2 border-amber-900/10 pt-4">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-xs font-bold text-emerald-800 uppercase"><i class="fa-solid fa-circle-question mr-1"></i> 확인 퀴즈</span>
+                    <span id="quiz-status-badge" class="text-[10px] bg-amber-200 text-amber-900 font-bold px-2 py-0.5 rounded-full">10포인트</span>
+                </div>
+                
+                <p id="quiz-question" class="font-bold text-sm sm:text-base text-[#3b2314] mb-3">
+                    퀴즈 질문이 들어갑니다.
+                </p>
+
+                <!-- 보기 선택지 -->
+                <div id="quiz-options" class="space-y-2 mb-4">
+                    <!-- Dynamic buttons -->
+                </div>
+
+                <!-- 피드백 메시지 -->
+                <div id="quiz-feedback" class="hidden p-3 rounded-xl text-xs sm:text-sm font-semibold mb-4 leading-snug">
+                </div>
+            </div>
+
+            <button id="modal-close-btn" onclick="closeModal()" class="w-full bg-[#523621] hover:bg-[#382212] text-amber-100 font-bold py-3 rounded-xl shadow transition-all">
+                닫기 및 탐험 계속하기
+            </button>
+        </div>
+    </div>
+
+    <!-- 게임 스크립트 -->
+    <script>
+        // 와시쓰 6대 요소 데이터베이스
+        const washitsuData = {
+            tatami: {
+                title: "다다미 (たたみ)",
+                sub: "Tatami - 짚으로 만든 일본 전통 바닥재",
+                icon: "fa-rug",
+                desc: "등신재(짚)를 짠 뒤 표면에 등골풀 표피를 덮어 만든 전통 바닥재입니다. 다다미 1장의 크기로 방의 넓이를 나타냅니다. (예: 6조 방 = 다다미 6장 크기)",
+                tip: "다다미의 가장자리 테두리(천 부분)나 문턱은 가문의 문양이 있거나 쉽게 손상되므로 밟지 않는 것이 중요한 예절입니다!",
+                quiz: {
+                    q: "와시쓰의 다다미 방에 들어갔을 때 지켜야 할 올바른 예절은 무엇일까요?",
+                    options: [
+                        "다다미의 가장자리(테두리 천)나 문턱을 밟지 않는다.",
+                        "다다미 위에서는 항상 신발을 신고 다닌다.",
+                        "다다미 테두리를 크게 밟으며 이동한다.",
+                        "다다미 개수는 방 크기와 아무 상관이 없다."
+                    ],
+                    ans: 0,
+                    exp: "정답입니다! 다다미의 가장자리 테두리와 문턱, 방석은 밟지 않는 것이 와시쓰의 대표적인 예절입니다."
+                }
+            },
+            tokonoma: {
+                title: "도코노마 (とこのま)",
+                sub: "Tokonoma - 방 한쪽에 마련된 장식 공간",
+                icon: "fa-scroll",
+                desc: "방 바닥보다 한 단 높게 만들어 놓은 공간으로, 계절에 맞는 족자(掛け軸)를 걸거나 예쁜 꽃병을 장식하여 손님을 정성껏 맞이하는 공간입니다.",
+                tip: "도코노마는 미술품을 감상하는 신성한 장소이므로 물건을 함부로 놓거나 짐을 올리면 안 됩니다.",
+                quiz: {
+                    q: "도코노마(とこのま)에 대한 설명으로 옳은 것은 무엇일까요?",
+                    options: [
+                        "이불과 옷을 보관하는 붙박이장이다.",
+                        "족자나 꽃병을 장식하여 정성을 나타내는 공간이다.",
+                        "채광을 위해 창호지를 바른 미닫이문이다.",
+                        "손님이 누워서 잠을 자는 침대 공간이다."
+                    ],
+                    ans: 1,
+                    exp: "정답입니다! 도코노마는 족자나 꽃꽂이 등을 장식해 손님을 맞이하는 일본 전통 방의 상징적 공간입니다."
+                }
+            },
+            kotatsu: {
+                title: "고타쓰 (こたつ)",
+                sub: "Kotatsu - 일본의 대표적인 난방 테이블",
+                icon: "fa-fire",
+                desc: "낮은 테이블 아래에 전열기 등의 난방 기구가 붙어 있고, 그 위에 두꺼운 이불을 덮어 온기를 가두는 난방 기구입니다. 온 가족이 모여 귤을 먹는 풍경으로 유명합니다.",
+                tip: "일본은 온돌(바닥 난방) 구조가 드물기 때문에 고타쓰가 겨울철 방 안 공기를 따뜻하게 유지하는 핵심 역할을 합니다.",
+                quiz: {
+                    q: "고타쓰(こたつ)의 주요 용도는 무엇일까요?",
+                    options: [
+                        "옷을 보관하는 장농 역할",
+                        "테이블 아래 전열기와 이불을 이용한 난방 역할",
+                        "방과 방 사이를 구분하는 가림막 역할",
+                        "채광을 조절하는 창문 역할"
+                    ],
+                    ans: 1,
+                    exp: "정답입니다! 고타쓰는 테이블 아래 난방 장치와 이불을 이용해 따뜻함을 유지하는 전통 난방 기구입니다."
+                }
+            },
+            shoji: {
+                title: "쇼지 (しょうじ)",
+                sub: "Shoji - 채광용 종이 미닫이문",
+                icon: "fa-sun",
+                desc: "나무 틀에 은은하게 햇빛이 통과하는 얇은 창호지를 붙여 만든 미닫이문입니다. 바깥의 자연광을 방 안으로 부드럽게 들여보내는 역할을 합니다.",
+                tip: "종이로 되어 있어 찢어지기 쉽기 때문에 손가락으로 누르지 않도록 주의해야 합니다.",
+                quiz: {
+                    q: "쇼지(しょうじ)문이 가진 대표적인 특징은 무엇일까요?",
+                    options: [
+                        "두꺼운 철판으로 만들어 방음이 잘 된다.",
+                        "햇빛이 잘 통하도록 얇은 창호지를 바른 채광용 문이다.",
+                        "이불을 넣어두는 옷장 문이다.",
+                        "바닥에 깔아두는 바닥재이다."
+                    ],
+                    ans: 1,
+                    exp: "정답입니다! 쇼지는 햇빛이 부드럽게 통하도록 얇은 종이를 바른 채광용 미닫이문입니다."
+                }
+            },
+            fusuma: {
+                title: "후스마 (ふすま)",
+                sub: "Fusuma - 방과 방 사이를 나누는 미닫이문",
+                icon: "fa-door-closed",
+                desc: "나무 틀 양면에 두꺼운 종이나 헝겊을 여러 겹 붙여 만든 미닫이문입니다. 빛이 통하지 않으며, 방과 방 사이를 구분하거나 공간을 나누는 용도로 쓰입니다.",
+                tip: "후스마 겉면에는 아름다운 산수화나 그림이 그려져 있는 경우가 많습니다.",
+                quiz: {
+                    q: "후스마(ふすま)에 대한 설명으로 알맞은 것은?",
+                    options: [
+                        "햇빛을 통과시키는 투명한 유리창이다.",
+                        "두꺼운 종이나 헝겊을 붙여 방 사이를 구분하는 미닫이문이다.",
+                        "바닥에 까는 짚 자리이다.",
+                        "음식을 조리하는 부엌 도구이다."
+                    ],
+                    ans: 1,
+                    exp: "정답입니다! 후스마는 두꺼운 종이를 붙여 방과 방 사이를 구획하는 칸막이 미닫이문입니다."
+                }
+            },
+            oshiire: {
+                title: "오시이레 (おしいれ)",
+                sub: "Oshiire - 이불과 물건을 넣는 붙박이장",
+                icon: "fa-box-archive",
+                desc: "와시쓰의 한쪽 벽면에 만들어진 깊은 붙박이장입니다. 보통 위아래 2단으로 나뉘어 있으며, 낮 동안 이불이나 방석, 짐을 넣어두어 방을 넓게 사용합니다.",
+                tip: "낮에는 이불을 오시이레에 넣고, 밤에 다시 꺼내 다다미 위에 펴고 자는 생활 방식이 일반적입니다.",
+                quiz: {
+                    q: "오시이레(おしいれ)의 주요 기능은 무엇일까요?",
+                    options: [
+                        "손님을 모시는 높은 장식 공간",
+                        "이불이나 방석, 물건을 보관하는 붙박이장",
+                        "따뜻한 불을 쬐는 난방 기구",
+                        "바깥 풍경을 보는 베란다 창문"
+                    ],
+                    ans: 1,
+                    exp: "정답입니다! 오시이레는 이불이나 보관물들을 넣어 방 공간을 효율적으로 쓰게 돕는 붙박이장입니다."
+                }
+            }
+        };
+
+        // 게임 상태
+        let visitedHotspots = new Set();
+        let userScore = 0;
+        let activeKey = null;
+
+        // 게임 시작
+        function startGame() {
+            visitedHotspots.clear();
+            userScore = 0;
+
+            document.getElementById('stamp-count').innerText = "0";
+            document.getElementById('score-display').innerText = "0";
+
+            document.getElementById('screen-start').classList.add('hidden');
+            document.getElementById('screen-clear').classList.add('hidden');
+            document.getElementById('main-header').classList.remove('hidden');
+            document.getElementById('screen-room').classList.remove('hidden');
+        }
+
+        // 핫스팟 클릭 시 모달 열기
+        function openHotspot(key) {
+            activeKey = key;
+            const data = washitsuData[key];
+            if (!data) return;
+
+            document.getElementById('modal-title').innerText = data.title;
+            document.getElementById('modal-sub').innerText = data.sub;
+            document.getElementById('modal-desc').innerText = data.desc;
+            document.getElementById('modal-tip').innerText = data.tip;
+            document.getElementById('modal-icon').innerHTML = `<i class="fa-solid ${data.icon}"></i>`;
+
+            // 퀴즈 렌더링
+            document.getElementById('quiz-question').innerText = `Q. ${data.quiz.q}`;
+            const optContainer = document.getElementById('quiz-options');
+            optContainer.innerHTML = '';
+
+            document.getElementById('quiz-feedback').classList.add('hidden');
+
+            data.quiz.options.forEach((optText, i) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full p-3 text-left font-semibold text-xs sm:text-sm rounded-xl border border-gray-300 hover:border-emerald-600 hover:bg-emerald-50 text-gray-800 transition-all flex items-center justify-between";
+                btn.innerHTML = `<span>${i + 1}. ${optText}</span> <i class="fa-regular fa-circle text-gray-300"></i>`;
+                btn.onclick = () => submitAnswer(i, data.quiz.ans, data.quiz.exp);
+                optContainer.appendChild(btn);
+            });
+
+            document.getElementById('quiz-modal').classList.remove('hidden');
+        }
+
+        // 퀴즈 답안 제출
+        function submitAnswer(chosenIdx, correctIdx, expText) {
+            const feedback = document.getElementById('quiz-feedback');
+            const options = document.getElementById('quiz-options').children;
+
+            const isCorrect = (chosenIdx === correctIdx);
+
+            for (let i = 0; i < options.length; i++) {
+                if (i === correctIdx) {
+                    options[i].className = "w-full p-3 text-left font-bold text-xs sm:text-sm rounded-xl border-2 border-emerald-600 bg-emerald-50 text-emerald-900 flex items-center justify-between";
+                    options[i].querySelector('i').className = "fa-solid fa-circle-check text-emerald-600";
+                } else if (i === chosenIdx && !isCorrect) {
+                    options[i].className = "w-full p-3 text-left font-bold text-xs sm:text-sm rounded-xl border-2 border-rose-500 bg-rose-50 text-rose-900 flex items-center justify-between";
+                    options[i].querySelector('i').className = "fa-solid fa-circle-xmark text-rose-600";
+                } else {
+                    options[i].className = "w-full p-3 text-left text-xs sm:text-sm rounded-xl border border-gray-200 text-gray-400 opacity-50";
+                }
+                options[i].onclick = null; // 중복 클릭 방지
+            }
+
+            feedback.classList.remove('hidden');
+            if (isCorrect) {
+                feedback.className = "p-3 rounded-xl text-xs sm:text-sm font-semibold mb-4 bg-emerald-100 text-emerald-900 border-l-4 border-emerald-600";
+                feedback.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600 mr-1"></i> 정답입니다! (+10점)<br><span class="text-xs text-emerald-800 mt-1 block">${expText}</span>`;
+                
+                if (!visitedHotspots.has(activeKey)) {
+                    userScore += 10;
+                }
+            } else {
+                feedback.className = "p-3 rounded-xl text-xs sm:text-sm font-semibold mb-4 bg-rose-100 text-rose-900 border-l-4 border-rose-600";
+                feedback.innerHTML = `<i class="fa-solid fa-circle-xmark text-rose-600 mr-1"></i> 아쉽네요! 다시 확인해보세요.<br><span class="text-xs text-rose-800 mt-1 block">${expText}</span>`;
+            }
+
+            // 스탬프 수집 처리
+            if (!visitedHotspots.has(activeKey)) {
+                visitedHotspots.add(activeKey);
+                document.getElementById('stamp-count').innerText = visitedHotspots.size;
+                document.getElementById('score-display').innerText = userScore;
+            }
+        }
+
+        // 모달 닫기
+        function closeModal() {
+            document.getElementById('quiz-modal').classList.add('hidden');
+
+            // 6개 모두 수집 완료 시 결과 화면
+            if (visitedHotspots.size >= 6) {
+                setTimeout(() => {
+                    showClearScreen();
+                }, 300);
+            }
+        }
+
+        // 결과 화면 보기
+        function showClearScreen() {
+            document.getElementById('screen-room').classList.add('hidden');
+            document.getElementById('main-header').classList.add('hidden');
+            document.getElementById('screen-clear').classList.remove('hidden');
+            document.getElementById('final-score').innerText = `${userScore} P`;
+        }
+
+        function checkCompletionDirect() {
+            if (visitedHotspots.size < 6) {
+                alert(`아직 탐험하지 않은 요소가 있습니다! (${visitedHotspots.size}/6)\n방 안의 반짝이는 버튼을 모두 클릭해보세요.`);
+            } else {
+                showClearScreen();
+            }
+        }
+    </script>
+</body>
+</html>
